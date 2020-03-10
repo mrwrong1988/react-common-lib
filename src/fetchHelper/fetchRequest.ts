@@ -1,19 +1,21 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import FetchException from './fetchException';
-import {ExceptionTypes, HttpMethods} from './consts/index';
+import {ExceptionTypes} from './consts/index';
 import { systemReportError } from '../actions/index';
 import FetchResponse from './fetchResponse';
 
-type paramsMethodsType =
+type ParamsMethodsType =
   | 'get'
   | 'delete'
   | 'head'
   | 'options'
 
-type bodyMethodsType =
+type BodyMethodsType =
 	| 'post'
 	| 'put'
-	| 'patch'
+  | 'patch'
+
+export type MethodsType = ParamsMethodsType | BodyMethodsType | 'form'
 
 const paramsMethods = ['get', 'delete', 'head', 'options']
 
@@ -44,11 +46,20 @@ class FetchRequest {
     return false;
   }
 
+  get = async (path: string, data: any, headers?: any) => this._fetch('get', path, data, headers)
+  post = async (path: string, data: any, headers?: any) => this._fetch('post', path, data, headers)
+  put = async (path: string, data: any, headers?: any) => this._fetch('put', path, data, headers)
+  patch = async (path: string, data: any, headers?: any) => this._fetch('patch', path, data, headers)
+  delete = async (path: string, data: any, headers?: any) => this._fetch('delete', path, data, headers)
+  head = async (path: string, data: any, headers?: any) => this._fetch('head', path, data, headers)
+  options = async (path: string, data: any, headers?: any) => this._fetch('options', path, data, headers)
+  form = async (path: string, data: any, headers?: any) => this._fetch('form', path, data, headers)
+
   private _fetch = async (
-    method: paramsMethodsType | bodyMethodsType | 'form',
+    method: MethodsType,
     path: string,
     data: any,
-    headers: any,
+    headers: any = {},
   ) => {
     const isForm = method === 'form'
     let fetchConfig: AxiosRequestConfig = {
@@ -64,9 +75,9 @@ class FetchRequest {
       let resJson
       if (paramsMethods.indexOf(method)  === -1) {
         fetchConfig = { params: data, ...fetchConfig }
-        resJson = await axios[requestMethod as paramsMethodsType](path, fetchConfig)
+        resJson = await axios[requestMethod as ParamsMethodsType](path, fetchConfig)
       } else {
-        resJson = await axios[requestMethod as bodyMethodsType](path, data, fetchConfig)
+        resJson = await axios[requestMethod as BodyMethodsType](path, data, fetchConfig)
       }
       const response = new FetchResponse(resJson);
         if (!response.success) {
@@ -78,9 +89,7 @@ class FetchRequest {
             },
           });
         }
-        return {
-          ...response,
-        };
+        return response.body;
     } catch (error) {
       const refetch= () => this._fetch(method, path, data, headers)
       if (!FetchRequest.preHandleResponse(error, refetch)) {
@@ -92,5 +101,7 @@ class FetchRequest {
     }
   }
 }
+
+export const api = new FetchRequest();
 
 export default FetchRequest;

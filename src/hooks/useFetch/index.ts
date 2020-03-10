@@ -1,12 +1,13 @@
 import { useState, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-// import { message } from 'antd'
-// import { showLoadingBar, closeLoadingBar } from 'actions/common'
-// import api from 'utils/api'
+import { systemShowLoading, systemHideLoading, systemReportError } from '../../actions'
+import {api, MethodsType} from '../../fetchHelper'
+
+
 
 const useFetch = <T extends any>({
 	getData = (value: T) => value,
-	defaultValue = null,
+	defaultValue = undefined,
 	showError = true,
 	showGlobalLoading = true,
 } = {}) => {
@@ -15,25 +16,26 @@ const useFetch = <T extends any>({
 	const dispatch = useDispatch()
 
 	const fetchFunc = useCallback(
-		async ({ method = 'get', path, params }) => {
+		async ({ method = 'get', path, params }: {method: MethodsType, path: string, params: any}) => {
 			try {
 				setLoading(true)
 				if (showGlobalLoading) {
-					// dispatch(showLoadingBar())
+					dispatch(systemShowLoading())
 				}
-        // const res = await api[method](path, params)
-        const res = 'result' as any
+
+        const res = await api[method](path, params)
 				const data = getData ? getData(res) : res
 				setData(data)
 				return data
 			} catch (error) {
 				if (showError) {
 					// message.error(error.message || '操作失败')
+					dispatch(systemReportError(error))
 				}
 			} finally {
 				setLoading(false)
 				if (showGlobalLoading) {
-					// dispatch(closeLoadingBar())
+					dispatch(systemHideLoading())
 				}
 			}
 		},

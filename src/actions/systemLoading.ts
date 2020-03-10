@@ -1,15 +1,10 @@
-export const SYSTEM_SHOW_LOADING = '@@system/SHOW_LOADING';
-export const SYSTEM_HIDE_LOADING = '@@system/HIDE_LOADING';
+import {createAction} from 'redux-actions'
 
-export function systemShowLoading(text: string) {
-  return {
-    type: SYSTEM_SHOW_LOADING,
-    payload: text
-  };
+export enum ActionType {
+  show = '@@system/SHOW_LOADING',
+  hide = '@@system/HIDE_LOADING',
 }
 
-export function systemHideLoading() {
-  return {
-    type: SYSTEM_HIDE_LOADING
-  };
-}
+export const systemShowLoading = createAction(ActionType.show)
+export const systemHideLoading = createAction(ActionType.hide)
+

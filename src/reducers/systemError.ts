@@ -1,4 +1,4 @@
-import { SYSTEM_REPORT_ERROR, SYSTEM_CLEAN_ERROR } from '../actions/systemError';
+import { ActionType } from '../actions/systemError';
 import createReducer from './createReducer';
 
 const initialState = {
@@ -9,12 +9,12 @@ const initialState = {
 type StateType = typeof initialState;
 
 const handlers = {
-  [SYSTEM_REPORT_ERROR](state: StateType, { payload }: {payload: any}) {
+  [ActionType.report](state: StateType, { payload }: {payload: any}) {
     const { type, message } = payload;
     return {type, message}
   },
 
-  [SYSTEM_CLEAN_ERROR]() {
+  [ActionType.clean]() {
     return initialState;
   }
 };

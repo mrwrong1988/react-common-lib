@@ -1,15 +1,9 @@
-export const SYSTEM_REPORT_ERROR = '@@system/REPORT_ERROR';
-export const SYSTEM_CLEAN_ERROR = '@@system/CLEAN_ERROR';
+import {createAction} from 'redux-actions'
 
-export function systemReportError(error: Error) {
-  return {
-    type: SYSTEM_REPORT_ERROR,
-    payload: error
-  };
+export enum ActionType {
+  report = '@@system/REPORT_ERROR',
+  clean = '@@system/CLEAN_ERROR',
 }
 
-export function systemCleanError() {
-  return {
-    type: SYSTEM_CLEAN_ERROR
-  };
-}
+export const systemReportError = createAction(ActionType.report, (error?: Error) => error)
+export const systemCleanError = createAction(ActionType.clean)

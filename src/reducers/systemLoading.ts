@@ -1,4 +1,4 @@
-import { SYSTEM_SHOW_LOADING, SYSTEM_HIDE_LOADING } from '../actions/systemLoading';
+import { ActionType } from '../actions/systemLoading';
 import createReducer from './createReducer';
 
 const initialState = {
@@ -9,12 +9,12 @@ const initialState = {
 type StateType = typeof initialState;
 
 const handlers = {
-  [SYSTEM_SHOW_LOADING](state: StateType, { payload = { text: '' } }) {
+  [ActionType.show](state: StateType, { payload = { text: '' } }) {
     const { text } = payload;
     return {display: true, text};
   },
 
-  [SYSTEM_HIDE_LOADING]() {
+  [ActionType.hide]() {
     return {display: false, text: ''};
   }
 };
