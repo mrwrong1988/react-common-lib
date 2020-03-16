@@ -16,7 +16,8 @@ const useResource = (key, autoFetch, { params, option } = {}) => {
 
 	const loadResource = useCallback(
 		(params, option = {}) => {
-      const resource = store.getState().resources[key]
+			const resource = store.getState().resources[key]
+			// todo 该处判断应该放到action中?
 			if (
 				!resource.data ||
 				option.refresh ||

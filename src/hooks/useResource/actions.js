@@ -1,5 +1,4 @@
 import { createAction } from 'redux-actions'
-import store from 'src/store'
 import api from 'src/utils/api'
 import resourceConfig from './resourceConfig'
 
@@ -34,14 +33,14 @@ export const resetResource = createAction(RESET_RESOURCE, key => key)
 
 export const fetchResource = createAction(
 	UPDATE_RESOURCE,
-	async (key, params, option = {}) => {
+	(key, params, option = {}) => async dispatch => {
     const { path, requestParams } = getPathAndParams(
       resourceConfig[key].path,
       params,
     )
 		try {
       const {getData} = resourceConfig[key]
-			store.dispatch(updateResource({ key, newProps: option.clear ? { loading: true, data: undefined } : { loading: true } }))
+			dispatch(updateResource({ key, newProps: option.clear ? { loading: true, data: undefined } : { loading: true } }))
 			const res = await api.get(path, requestParams)
 			const data = getData ? getData(res) : res
 			return {
@@ -54,7 +53,7 @@ export const fetchResource = createAction(
 				},
 			}
 		} catch (error) {
-			store.dispatch(
+			dispatch(
 				updateResource({ key, newProps: { loading: false, error } }),
 			)
 			throw error
