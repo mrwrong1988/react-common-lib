@@ -12,14 +12,9 @@ const resourceConfig = {
 export const initialState = Object.keys(resourceConfig).reduce((state, key) => {
 	return {
 		...state,
-		[key]: resourceConfig[key].local
-			? resourceConfig[key].initialData
-			: {
-					data: resourceConfig[key].initialData,
-					params: 'undefined',
-					loading: false,
-					error: null,
-			  },
+		[key]:  {
+			data: resourceConfig[key].initialData,
+		},
 	}
 }, {})
 

@@ -1,6 +1,5 @@
 import { useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import store from 'src/store'
 import * as actions from './actions'
 
 /**
@@ -10,21 +9,13 @@ import * as actions from './actions'
  * @param {*} params 请求参数
  * @param {*} refresh 是否重新请求
  */
-const useResource = (key, autoFetch, { params, option } = {}) => {
+const useResource = (key, autoFetch = true, { params, option } = {}) => {
 	const dispatch = useDispatch()
 	const resource = useSelector(state => state.resources[key])
 
 	const loadResource = useCallback(
 		(params, option = {}) => {
-			const resource = store.getState().resources[key]
-			// todo 该处判断应该放到action中?
-			if (
-				!resource.data ||
-				option.refresh ||
-				JSON.stringify(params) !== resource.params
-			) {
-				dispatch(actions.fetchResource(key, params, option))
-			}
+			dispatch(actions.loadResource(key, params, option))
 		},
 		[dispatch, key],
 	)

@@ -1,10 +1,14 @@
 import { createAction } from 'redux-actions'
+import isEqual from 'lodash/isEqual'
 import api from 'src/utils/api'
 import resourceConfig from './resourceConfig'
 
-export const SET_RESOURCE = 'SET_RESOURCE'
-export const UPDATE_RESOURCE = 'UPDATE_RESOURCE'
-export const RESET_RESOURCE = 'RESET_RESOURCE'
+export const resourceMangeAction = {
+	loading: 'RESOURCE_MANAGE/pending',
+	fulfilled: 'RESOURCE_MANAGE/fulfilled',
+	rejected: 'RESOURCE_MANAGE/rejected',
+	reset: 'RESOURCE_MANAGE/reset',
+}
 
 export const getPathAndParams = (path, params = {}) => {
 	const requestParams = { ...params }
@@ -19,45 +23,46 @@ export const getPathAndParams = (path, params = {}) => {
 	return { path: pathKeys.join('/'), requestParams }
 }
 
-export const updateResource = createAction(
-	UPDATE_RESOURCE,
-	({ key, newProps }) => ({ key, newProps }),
+export const setLoading = createAction(
+	resourceMangeAction.loading,
+	key => ({key}),
 )
 
-export const setResource = createAction(SET_RESOURCE, (key, props) => ({
-	key,
-	props,
-}))
+export const setError = createAction(
+	resourceMangeAction.rejected,
+	(key, error) => ({key, error}),
+)
 
-export const resetResource = createAction(RESET_RESOURCE, key => key)
+export const resetResource = createAction(resourceMangeAction.reset, key => ({key, data: resourceConfig[key].initialData}))
 
-export const fetchResource = createAction(
-	UPDATE_RESOURCE,
-	(key, params, option = {}) => async dispatch => {
-    const { path, requestParams } = getPathAndParams(
-      resourceConfig[key].path,
-      params,
-    )
+export const loadResource = createAction(
+	resourceMangeAction.fulfilled,
+	(key, params, option) => async (dispatch, getState) => {
+		// 使用缓存
+		const currentResource = getState()[key] || {}
+		if (currentResource.data && isEqual(params, currentResource.params) && !option.refresh) {
+			return currentResource
+		}
+
+		const {path, getData, cumstomLoading, customError} = resourceConfig[key]
+		const { finalPath, requestParams } = getPathAndParams(path, params)
 		try {
-      const {getData} = resourceConfig[key]
-			dispatch(updateResource({ key, newProps: option.clear ? { loading: true, data: undefined } : { loading: true } }))
-			const res = await api.get(path, requestParams)
-			const data = getData ? getData(res) : res
-			return {
-        key,
-				newProps: {
-					data,
-					loading: false,
-					error: null,
-					params: JSON.stringify(params),
-				},
+			if (cumstomLoading) {
+				dispatch(setLoading(key))
 			}
+			const res = await api.get(finalPath, requestParams)
+			const data = getData ? getData(res) : res
+			return { key, data, params }
 		} catch (error) {
-			dispatch(
-				updateResource({ key, newProps: { loading: false, error } }),
-			)
-			throw error
+			if (customError) {
+				dispatch(setError(key, error))
+			} else {
+				throw error
+			}
 		}
 	},
-	(key, params, option = {}) => ({ noMask: option.hideGlobalLoading }),
+	(key) => {
+		const {cumstomLoading} = resourceConfig[key]
+		return { noMask: cumstomLoading }
+	},
 )

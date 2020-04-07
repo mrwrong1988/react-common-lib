@@ -1,28 +1,46 @@
 import { handleActions } from 'redux-actions'
-import { UPDATE_RESOURCE, SET_RESOURCE, RESET_RESOURCE } from './actions'
+import { resourceMangeAction } from './actions'
 import { initialState } from './resourceConfig'
 
 const resources = handleActions(
 	{
-		[UPDATE_RESOURCE]: (state, { payload: { key, newProps } }) => {
+		[resourceMangeAction.loading]: (state, { payload: { key } }) => {
+			return {
+				...state,
+				[key]: {...state[key], loading: true},
+			}
+		},
+		[resourceMangeAction.fulfilled]: (state, { payload: { key, data, params } }) => {
+			return {
+				...state,
+				[key]: {
+					data,
+					params,
+					loading: false,
+					error: null,
+				},
+			}
+		},
+
+		[resourceMangeAction.rejected]: (state, { payload: {key, error} }) => {
 			return {
 				...state,
 				[key]: {
 					...state[key],
-					...newProps,
+					loading: false,
+					error,
 				},
 			}
 		},
-		[SET_RESOURCE]: (state, { payload: { key, resource } }) => {
+		[resourceMangeAction.reset]: (state, { payload: { key, data } }) => {
 			return {
 				...state,
-				[key]: resource,
-			}
-		},
-		[RESET_RESOURCE]: (state, { payload: key }) => {
-			return {
-				...state,
-				[key]: initialState[key],
+				[key]: {
+					data,
+					params: null,
+					loading: false,
+					error: null,
+				},
 			}
 		},
 	},
